@@ -17,7 +17,7 @@ import scala.util.{Failure, Success, Try}
 
 trait DBOps[T] {
 
-  def addEmployee(content: String): Future[Done]
+  def addEmployee(content: String): Either[Throwable, Future[Int]]
 
 }
 
@@ -26,9 +26,8 @@ case class PostgresAction() extends  DbAction
 case class CassandraAction() extends  DbAction
 
   class PostgresRepo(val config: DatabaseConfig[JdbcProfile]) extends DBOps[PostgresAction] with Db  with  SlickTables {
-    override def addEmployee(content: String): Future[Done] = {
+    override def addEmployee(content: String): Either[Throwable, Future[Int]] = {
       val employeeQuery = TableQuery[EmployeeTable]
-      println("I nside postgres")
       val emp = Employee(name = content)
       val insertQuery = employeeQuery += emp
       Try(db.run(insertQuery)) match {
@@ -36,21 +35,23 @@ case class CassandraAction() extends  DbAction
           Right(value)
         case Failure(exception) => Left(exception)
       }
-      Future(Done)
       }
 
   }
 
   class CassendraRepo(persistentEntityRegistry: PersistentEntityRegistry, session: CassandraSession)
                       extends DBOps[CassandraAction] {
-    override def addEmployee(content: String): Future[Done] = {
-      println("I nside Cassendra")
-
-      persistentEntityRegistry
-        .refFor[EmployeeEntity]("abc").ask(AddEmployee(EmployeeData("ktp", content))).map {
-        res =>
-          res
+    override def addEmployee(content: String): Either[Throwable, Future[Int]] = {
+      val res: Try[Future[AddEmployee#ReplyType]] = Try {
+        persistentEntityRegistry
+          .refFor[EmployeeEntity]("abc").ask(AddEmployee(EmployeeData("ktp", content)))
       }
+
+
+    res match {
+      case Success(value) => Right(Future(1))
+      case Failure(ex) => Left(ex)
+    }
     }
   }
 

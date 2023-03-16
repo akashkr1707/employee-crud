@@ -53,24 +53,22 @@ object  KafkaConsumer{
     Json.parse(data).as[EmployeeDetails]
   }
 
-  def addEmployeeToDB[T](content: String)(implicit DBOps: DBOps[T]): Future[Done] = {
+  def addEmployeeToDB[T](content: String)(implicit DBOps: DBOps[T]): Either[Throwable, Future[Int]] = {
    DBOps.addEmployee(content)
   }
-  val processEmployeeData = Flow[EmployeeDetails].map {
+  val processEmployeeData: Flow[EmployeeDetails, Either[Throwable, Future[Int]], NotUsed] = Flow[EmployeeDetails].map {
    case emp if emp.dbType == "C" => println(s"Adding employee ${emp.content} in Cassandra Db")
-    addEmployeeToDB[CassandraAction](emp.content)
+   addEmployeeToDB[CassandraAction](emp.content)
    case emp if emp.dbType == "P" =>
     addEmployeeToDB[PostgresAction](emp.content)
    case _ => println("invalid Db type")
+      Left(throw new Exception("Invalid DB type"))
   }
-
-
 
  val sink = kafkaSource
    .via(messgaeDecodeFlow)
    .via(parseEmployeeData)
-   .via(processEmployeeData)
-   .runWith(Sink.foreach(println))
+   .via(processEmployeeData).runWith(Sink.foreach(println))
 
 sink  onComplete {
     case Success(_) => println("Done"); system.terminate()
