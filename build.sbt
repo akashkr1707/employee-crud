@@ -12,6 +12,8 @@ ThisBuild / libraryDependencySchemes +=
 val macwire = "com.softwaremill.macwire" %% "macros" % "2.3.3" % "provided"
 val scalaTest = "org.scalatest" %% "scalatest" % "3.1.1" % Test
 
+val catsEffect = "org.typelevel" %% "cats-core" % "2.7.0"
+
 lazy val `hello` = (project in file("."))
   .aggregate(`employee-api`, `employee-impl`,`kafka-employee-api`, `kafka-employee-impl`,`hello-api`, `hello-impl`, `hello-stream-api`, `hello-stream-impl`)
 
@@ -36,7 +38,8 @@ lazy val `employee-impl` = (project in file("employee-impl"))
       "org.postgresql" % "postgresql" % "42.3.4",
       "com.typesafe.slick" %% "slick-hikaricp" % "3.3.3",
       "com.github.tminglei" %% "slick-pg" % "0.20.3",
-      "com.github.tminglei" %% "slick-pg_play-json" % "0.20.3"
+      "com.github.tminglei" %% "slick-pg_play-json" % "0.20.3",
+      catsEffect
     )
   )
   .settings(lagomForkedTestSettings)

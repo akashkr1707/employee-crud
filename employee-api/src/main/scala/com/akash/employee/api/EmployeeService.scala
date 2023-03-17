@@ -1,6 +1,7 @@
 package com.akash.employee.api
 
 import akka.Done
+import com.akash.employee.api.model.AddEmployeeResponse
 import com.lightbend.lagom.scaladsl.api.{Descriptor, Service, ServiceCall}
 import play.api.libs.json.{Json, OFormat}
 
@@ -12,7 +13,7 @@ object EmployeeDetails {
 
 trait EmployeeService  extends  Service {
 
-  def addEmployee(id: String): ServiceCall[EmployeeDetails, Done]
+  def addEmployee(id: String): ServiceCall[EmployeeDetails, AddEmployeeResponse]
 
   override def descriptor: Descriptor = {
     import Service._
