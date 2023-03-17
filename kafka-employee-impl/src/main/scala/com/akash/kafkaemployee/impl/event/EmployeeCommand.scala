@@ -5,6 +5,8 @@ import com.lightbend.lagom.scaladsl.persistence.PersistentEntity.ReplyType
 import com.lightbend.lagom.scaladsl.persistence.{AggregateEvent, AggregateEventShards, AggregateEventTag}
 import play.api.libs.json.{Format, Json}
 
+import java.util.UUID
+
 sealed trait EmployeeCommand[R] extends ReplyType[R]
 
 case class AddEmployee(employee: EmployeeData) extends EmployeeCommand[Done]
@@ -28,7 +30,7 @@ object AddedEmployee {
   implicit val format: Format[AddedEmployee] = Json.format[AddedEmployee]
 
 }
-case class EmployeeData(id: String, name: String)
+case class EmployeeData(id: UUID, name: String)
 
 object EmployeeData {
   implicit val format: Format[EmployeeData] = Json.format[EmployeeData]

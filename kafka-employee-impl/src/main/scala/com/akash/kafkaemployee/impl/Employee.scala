@@ -8,7 +8,6 @@ final case class Employee(id: Option[Long] = None,name: String)
 
 trait SlickTables { this: Db =>
 
-
   class EmployeeTable(tag: Tag) extends Table[Employee](tag,"employee2") {
     def id = column[Long]("id", O.PrimaryKey, O.AutoInc)
 

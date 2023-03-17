@@ -28,12 +28,12 @@ class EmployeeEventReadSideProcessor(db: CassandraSession, readSide: CassandraRe
    */
   private def createTable(): Future[Done] = {
     db.executeCreateTable(
-      """CREATE TABLE IF NOT EXISTS employee.employeedata (
-        |id text PRIMARY KEY, name text)""".stripMargin)
+      """CREATE TABLE IF NOT EXISTS employee.employeedataone (
+        |id UUID PRIMARY KEY, name text)""".stripMargin)
   }
 
   private def prepareStatements(): Future[Done] = {
-    db.prepare("INSERT INTO employee.employeedata (id, name) VALUES (?, ?)")
+    db.prepare("INSERT INTO employee.employeedataone (id, name) VALUES (?, ?)")
       .map { ps =>
         insertEmployee = ps
         Done
@@ -42,7 +42,7 @@ class EmployeeEventReadSideProcessor(db: CassandraSession, readSide: CassandraRe
 
   private def insertEmployee(employee: EmployeeData): Future[List[BoundStatement]] = {
     val bindInsertEmployee: BoundStatement = insertEmployee.bind()
-    bindInsertEmployee.setString("id", employee.id)
+    bindInsertEmployee.setUUID("id", employee.id)
     bindInsertEmployee.setString("name", employee.name)
     Future.successful(List(bindInsertEmployee))
   }
